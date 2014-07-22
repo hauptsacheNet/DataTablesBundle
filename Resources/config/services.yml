@@ -1,0 +1,10 @@
+parameters:
+    hn_data_tables.factory.class: Hn\DataTablesBundle\Factory\DataTableFactory
+
+services:
+    hn_data_tables.factory:
+        class: %hn_data_tables.factory.class%
+        arguments:
+          - @router
+          - @request_stack
+          - @doctrine.orm.entity_manager

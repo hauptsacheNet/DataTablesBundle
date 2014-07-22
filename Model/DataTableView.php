@@ -1,0 +1,230 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: kay
+ * Date: 05.06.14
+ * Time: 16:13
+ */
+
+namespace Hn\DataTablesBundle\Model;
+
+use Doctrine\Common\Util\Debug;
+use Doctrine\ORM\EntityManager;
+use Pagerfanta\Pagerfanta;
+use Pagerfanta\View\TwitterBootstrap3View;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RouterInterface;
+
+class DataTableView
+{
+    /**
+     * @var DataTable
+     */
+    private $dataTable;
+
+    /**
+     * @var array
+     */
+    private $params;
+
+    /** @var DataTableRow[] */
+    private $rows = array();
+
+    /**
+     * @var Pagerfanta
+     */
+    private $pager;
+
+    /**
+     * @var RouterInterface
+     */
+    private $router;
+
+    /**
+     * @var Request
+     */
+    private $request;
+
+    /**
+     * @var EntityManager
+     */
+    private $em;
+
+    /**
+     * @param DataTable $dataTable
+     * @param array $params
+     * @param Pagerfanta $pager
+     * @param RouterInterface $router
+     * @param Request $request
+     * @param EntityManager $em
+     */
+    public function __construct(DataTable $dataTable, array $params, Pagerfanta $pager, RouterInterface $router, Request $request, EntityManager $em)
+    {
+        $this->dataTable = $dataTable;
+        $this->params = $params;
+        $this->pager = $pager;
+        $this->router = $router;
+        $this->request = $request;
+        $this->em = $em;
+    }
+
+    /**
+     * @return DataTable
+     */
+    public function getDataTable()
+    {
+        return $this->dataTable;
+    }
+
+    /**
+     * @return Pagerfanta
+     */
+    public function getPager()
+    {
+        return $this->pager;
+    }
+
+    public function getColumns()
+    {
+        return $this->dataTable->getColumns();
+    }
+
+    /**
+     * @return DataTableRow[]
+     */
+    public function getRows()
+    {
+        $this->rows = array();
+        foreach ($this->pager as $row) {
+            $this->rows[] = new DataTableRow($row, $this->getDataTable());
+        }
+        return $this->rows;
+    }
+
+    /**
+     * @param DataTableColumn $column
+     * @return null|number
+     */
+    public function getColumnSortingIndex(DataTableColumn $column)
+    {
+        $currentSorting = $this->params['sorting'];
+        return array_key_exists($column->getPropertyPath(), $currentSorting)
+            ? $currentSorting[$column->getPropertyPath()] : null;
+    }
+
+    /**
+     * @param DataTableColumn $column
+     * @return string
+     */
+    public function generateColumnUrl(DataTableColumn $column)
+    {
+        // build params
+        $routeName = $this->request->get('_route');
+        $route = $this->router->getRouteCollection()->get($routeName);
+        $pathVariables = $route->compile()->getVariables();
+
+        $params = $this->request->query->all();
+
+        // add route params to params array
+        foreach ($pathVariables as $pathVar) {
+            $value = $this->request->get($pathVar, null);
+            if ($value !== null) {
+
+                if (is_object($value)) {
+            		// FIXME there must be a better way
+                    $meta = $this->em->getClassMetadata(get_class($value));
+                    if ($meta === null) {
+                        throw new \LogicException("Only Entities are implemented for automatic url generation");
+                    }
+
+                    $identifier = $meta->getIdentifierValues($value);
+                    if (count($identifier) > 1) {
+                        throw new \LogicException("Don't know how to handle multiple identifiers for url generation");
+                    } else if (empty($identifier)) {
+                        throw new \LogicException("There are no identifiers for " . get_class($value));
+                    } else {
+                        $params[$pathVar] = reset($identifier);
+                    }
+                } else if (is_scalar($value)) {
+                    $params[$pathVar] = $value;
+                }
+            }
+        }
+
+        $name = $this->dataTable->getName();
+        if (!array_key_exists($name, $params) || !is_array($params[$name])) {
+            $params[$name] = array();
+        }
+
+        $currentSortingIndex = $this->getColumnSortingIndex($column);
+        $nextSortingIndex = $currentSortingIndex === null
+            ? 0 : ($currentSortingIndex + 1) % count($column->getSortings());
+
+        $params[$name]['sorting'] = array(
+            $column->getPropertyPath() => $nextSortingIndex
+        );
+        return $this->router->generate($this->request->get('_route'), $params);
+    }
+
+    /**
+     * generates the html for th pager
+     *
+     * @return string
+     */
+    public function createPagerView()
+    {
+        $view = new TwitterBootstrap3View();
+
+        $options = array(
+            'prev_message'        => '&larr;',
+            'next_message'        => '&rarr;',
+        );
+
+        $request = $this->request;
+        $router = $this->router;
+        $dataTableDefinition = $this->dataTable;
+        $pager = $this->pager;
+        return $view->render($this->pager, function ($page) use ($request, $router, $dataTableDefinition, $pager) {
+            // build params
+            $routeName = $request->get('_route');
+            $route = $router->getRouteCollection()->get($routeName);
+            $pathVariables = $route->compile()->getVariables();
+
+            $params = $request->query->all();
+
+            // add route params to params array
+            foreach ($pathVariables as $pathVar) {
+                if ($request->get($pathVar, false)) {
+                    $params[$pathVar] = $request->get($pathVar);
+                }
+            }
+
+            $name = $dataTableDefinition->getName();
+            if (!array_key_exists($name, $params) || !is_array($params[$name])) {
+                $params[$name] = array();
+            }
+            $params[$name]['offset'] = ($page - 1) * $pager->getMaxPerPage();
+
+            return $router->generate($request->get('_route'), $params);
+        }, $options);
+    }
+
+    /**
+     * writes table data via fputcsv to tmp file and returns the result
+     *
+     * @return string
+     */
+    public function toCsv()
+    {
+        $fh = fopen('php://temp', 'w+');
+        for ($page = 1; $page <= $this->getPager()->getNbPages(); $page++) {
+            $this->getPager()->setCurrentPage($page);
+            foreach ($this->getRows() as $row) {
+                $data = $row->toArray();
+                fputcsv($fh, $data);
+            }
+        }
+        rewind($fh);
+        return mb_convert_encoding(stream_get_contents($fh), "Windows-1252", 'UTF-8');
+    }
+}

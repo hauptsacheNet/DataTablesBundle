@@ -1,0 +1,99 @@
+{# dataTableView - is required #}
+{# tableClass - allows setting a custom class for the table #}
+{% set dataTable = dataTableView.dataTable %}
+{% set columns = dataTableView.columns %}
+{% set rows = dataTableView.rows %}
+<div class="data-table data-table-{{ dataTable.name }} table-responsive">
+    {% set offsetStart = dataTableView.pager.getCurrentPageOffsetStart() %}
+    {% set offsetEnd = dataTableView.pager.getCurrentPageOffsetEnd() %}
+    {% set numberResults = dataTableView.pager.getNbResults() %}
+
+    <div class="row data-table-overhead">
+        <div class="col-sm-4 data-table-search">
+            {% block table_search %}{% endblock %}
+        </div>
+        <div class="col-sm-4 data-table-results">
+            {% block table_results %}
+                {% block entry_name %}Ergebnisse{% endblock %}
+                {{ offsetStart }} - {{ offsetEnd }} von {{ numberResults }}
+            {% endblock %}
+        </div>
+        <div class="col-sm-4 data-table-actions text-right">
+            {% block table_actions %}{% endblock %}
+        </div>
+    </div>
+
+    <table class="{{ tableClass|default('table table-striped table-hover') }}">
+        {% block thead %}
+            <thead>
+            {% block thead_tr %}
+                <tr>
+                    {%- spaceless %}
+                        {% block thead_tr_inner %}
+                            {% for column in columns %}
+                                {% set sortingIndex = dataTableView.getColumnSortingIndex(column) %}
+                                {% set hasSortings = column.hasSortings %}
+                                {% set columnName = column.name %}
+
+                                <th class="column-{{ columnName }}{% if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
+                                    {% set th_content = block('thead_column_' ~ columnName)|default( columnName|humanize|trans ) %}
+                                    {% if hasSortings %}
+                                        <a href="{{ dataTableView.generateColumnUrl(column) }}">
+                                            {{ th_content }}
+                                        </a>
+                                    {% else %}
+                                        {{ th_content }}
+                                    {% endif %}
+                                </th>
+                            {% endfor %}
+                        {% endblock thead_tr_inner %}
+                    {% endspaceless -%}
+                </tr>
+            {% endblock thead_tr %}
+            </thead>
+        {% endblock thead %}
+
+        {% block tbody %}
+            <tbody>
+            {% for row in rows %}
+                {% set data = row.data %}
+                {% block tbody_tr %}
+                    <tr>
+                        {%- spaceless %}
+                            {% block tbody_tr_inner %}
+                                {% for column in columns %}
+                                    {% set sortingIndex = dataTableView.getColumnSortingIndex(column) %}
+                                    {% set hasSortings = column.hasSortings %}
+                                    {% set columnName = column.name %}
+                                    {% set value = row.getColumnValue(column) %}
+                                    {% set type = row.getColumnType(column) %}
+
+                                    <td class="column-{{ column.name }} column-type-{{ type }}
+                                        {%- if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
+                                        {% set defaultRender %}
+                                        {% if value|length < 50 %}
+                                            {{ value|striptags }}
+                                        {% else %}
+                                            <div class="content-wrap">{{ value|striptags[0:200] }}</div>
+                                        {% endif %}
+                                        {% endset %}
+                                        {{ block('tbody_column_' ~ column.name)|default( defaultRender )|raw }}
+                                    </td>
+                                {% endfor %}
+                            {% endblock tbody_tr_inner %}
+                        {% endspaceless -%}
+                    </tr>
+                {% endblock tbody_tr %}
+
+            {% endfor %}
+            </tbody>
+        {% endblock tbody %}
+    </table>
+
+    <div class="data-table-pager">
+        {% set pager = dataTableView.createPagerView() %}
+        {% block table_pager %}
+            {{ pager|raw }}
+        {% endblock %}
+    </div>
+</div>

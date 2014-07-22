@@ -1,0 +1,23 @@
+{
+    "name": "hauptsache.net/data-tables-bundle",
+    "description": "A Bundle to easily create tables in symfony.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kay Wienöbst",
+            "email": "kay@hauptsache.net"
+        },
+        {
+            "name": "Marco Pfeiffer",
+            "email": "marco@hauptsache.net"
+        }
+    ],
+    "require": {
+    	"php": ">=5.3.3",
+    	"symfony/symfony": "2.4.*",
+    	"doctrine/orm": "~2.2,>=2.2.3"
+	},
+    "require-dev": {
+        "sensio/generator-bundle": "~2.3"
+    },
+}
