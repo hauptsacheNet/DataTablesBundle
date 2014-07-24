@@ -1,5 +1,5 @@
 {
-    "name": "hauptsacheNet/data-tables-bundle",
+    "name": "hauptsache-net/data-tables-bundle",
     "type": "library",
     "description": "A Bundle to easily create tables in symfony.",
     "license": "MIT",
