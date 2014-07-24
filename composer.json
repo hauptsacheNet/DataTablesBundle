@@ -23,5 +23,6 @@
     },
     "autoload": {
         "psr-0": { "Hn\\DataTablesBundle": "" }
-    }
+    },
+    "target-dir": "Hn/DataTablesBundle",
 }
