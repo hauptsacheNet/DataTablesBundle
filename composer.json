@@ -1,7 +1,7 @@
 {
     "name": "hn/data-tables-bundle",
     "type": "library",
-    "description": "A Bundle to easily create tables in symfony.",
+    "description": "A Bundle to easily create tables in symfony 2.5.",
     "license": "MIT",
     "authors": [
         {
