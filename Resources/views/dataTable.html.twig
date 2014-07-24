@@ -23,6 +23,8 @@
         </div>
     </div>
 
+    {{ block('before_table') }}
+
     <table class="{{ tableClass|default('table table-striped table-hover') }}">
         {% block thead %}
             <thead>
