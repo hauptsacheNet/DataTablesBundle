@@ -1,5 +1,5 @@
 {
-    "name": "hauptsache-net/data-tables-bundle",
+    "name": "hn/data-tables-bundle",
     "type": "library",
     "description": "A Bundle to easily create tables in symfony.",
     "license": "MIT",
@@ -23,5 +23,6 @@
     },
     "autoload": {
         "psr-0": { "Hn\\DataTablesBundle": "" }
-    }
+    },
+    "target-dir": "Hn/DataTablesBundle"
 }
