@@ -60,7 +60,7 @@
             {% for row in rows %}
                 {% set data = row.data %}
                 {% block tbody_tr %}
-                    <tr>
+                    <tr {{ block('table_tr_attr') }}>
                         {%- spaceless %}
                             {% block tbody_tr_inner %}
                                 {% for column in columns %}
