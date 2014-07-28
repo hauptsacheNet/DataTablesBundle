@@ -8,6 +8,8 @@
 
 namespace Hn\DataTablesBundle\Model;
 
+use Doctrine\ORM\QueryBuilder;
+
 abstract class DataTable
 {
     /**
@@ -86,6 +88,22 @@ abstract class DataTable
     {
         return array_key_exists($name, $this->columns)
             ? $this->columns[$name] : null;
+    }
+
+    public function applySortingToQueryBuilder(QueryBuilder $queryBuilder, $sorting)
+    {
+        // apply sorting
+        foreach ($sorting as $sortColumn => $sortIndex) {
+            $column = $this->getColumn($sortColumn);
+            if ($column !== null) {
+                $sorting = $column->getSorting($sortIndex);
+                foreach ($sorting as $field => $direction) {
+                    $queryBuilder->addOrderBy($field, $direction);
+                }
+            }
+        }
+
+        return $queryBuilder;
     }
 
     /**

@@ -39,17 +39,11 @@ class DataTableFactory
     {
         $params = array_merge($dataTableDefinition->getDefaultParameters(), $params);
         $request = $this->requestStack->getMasterRequest();
+
         $params = array_merge($params, $request->get($dataTableDefinition->getName(), array()));
-        // apply sorting
-        foreach ($params['sorting'] as $sortColumn => $sortIndex) {
-            $column = $dataTableDefinition->getColumn($sortColumn);
-            if ($column !== null) {
-                $sorting = $column->getSorting($sortIndex);
-                foreach ($sorting as $field => $direction) {
-                    $queryBuilder->addOrderBy($field, $direction);
-                }
-            }
-        }
+
+        $dataTableDefinition->applySortingToQueryBuilder($queryBuilder, $params['sorting']);
+
 
         // configure pager
         $pager = new Pagerfanta(new DoctrineORMAdapter($queryBuilder));
