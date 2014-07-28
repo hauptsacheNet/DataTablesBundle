@@ -8,6 +8,7 @@
 
 namespace Hn\DataTablesBundle\Model;
 
+use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
@@ -37,13 +38,19 @@ class DataTableRow
 
     public function getColumnValue(DataTableColumn $column)
     {
-        if (!$this->pA->isReadable($this->data, $column->getPropertyPath())) {
-            return null;
+        // symfony >= 2.5 with isReadable
+        if (method_exists($this->pA, 'isReadable')) {
+            if (!$this->pA->isReadable($this->data, $column->getPropertyPath())) {
+                return null;
+            }
+        }
+        try {
+            $value = $this->pA->getValue($this->data, $column->getPropertyPath());
+        } catch (NoSuchPropertyException $e) {
+            return null; // compatibility with symfony < 2.5
         }
 
-        $value = $this->pA->getValue($this->data, $column->getPropertyPath());
         $value = $column->getDataTransformer()->transform($value);
-
         return $value;
     }
 
