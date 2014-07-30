@@ -70,14 +70,16 @@
                                     {% set value = row.getColumnValue(column) %}
                                     {% set type = row.getColumnType(column) %}
 
-                                    <td class="column-{{ column.name }} column-type-{{ type }}
+                                    <td class="column-{{ columnName }} column-type-{{ type }}
                                         {%- if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
                                         {% set defaultRender %}
-                                        {% if value|length < 50 %}
-                                            {{ value|striptags }}
-                                        {% else %}
-                                            <div class="content-wrap">{{ value|striptags[0:200] }}</div>
-                                        {% endif %}
+                                            {% block default_render %}
+                                                {% if value|length < 50 %}
+                                                    {{ value|striptags }}
+                                                {% else %}
+                                                    <div class="content-wrap">{{ value|striptags[0:200] }}</div>
+                                                {% endif %}
+                                            {% endblock %}
                                         {% endset %}
                                         {{ block('tbody_column_' ~ column.name)|default( defaultRender )|raw }}
                                     </td>
