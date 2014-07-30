@@ -25,11 +25,11 @@
 
     {{ block('before_table') }}
 
-    <table class="{{ tableClass|default('table table-striped table-hover') }}">
+    <table class="{{ tableClass|default('table table-striped table-hover') }}" {{ block('table_attr') }}>
         {% block thead %}
             <thead>
             {% block thead_tr %}
-                <tr>
+                <tr {{ block('table_thead_tr_attr') }}>
                     {%- spaceless %}
                         {% block thead_tr_inner %}
                             {% for column in columns %}
@@ -92,10 +92,12 @@
         {% endblock tbody %}
     </table>
 
-    <div class="data-table-pager">
-        {% set pager = dataTableView.createPagerView() %}
-        {% block table_pager %}
-            {{ pager|raw }}
-        {% endblock %}
-    </div>
+    {% set pager = dataTableView.createPagerView() %}
+    {% if pager is not empty %}
+        <div class="data-table-pager">
+            {% block table_pager %}
+                {{ pager|raw }}
+            {% endblock %}
+        </div>
+    {% endif %}
 </div>

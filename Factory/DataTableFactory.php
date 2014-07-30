@@ -40,7 +40,9 @@ class DataTableFactory
         $params = array_merge($dataTableDefinition->getDefaultParameters(), $params);
         $request = $this->requestStack->getMasterRequest();
 
-        $params = array_merge($params, $request->get($dataTableDefinition->getName(), array()));
+        if ($request) {
+            $params = array_merge($params, $request->get($dataTableDefinition->getName(), array()));
+        }
 
         $dataTableDefinition->applySortingToQueryBuilder($queryBuilder, $params['sorting']);
 

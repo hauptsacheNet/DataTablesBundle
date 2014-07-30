@@ -58,7 +58,7 @@ class DataTableView
      * @param Request $request
      * @param EntityManager $em
      */
-    public function __construct(DataTable $dataTable, array $params, Pagerfanta $pager, RouterInterface $router, Request $request, EntityManager $em)
+    public function __construct(DataTable $dataTable, array $params, Pagerfanta $pager, RouterInterface $router, Request $request = null, EntityManager $em)
     {
         $this->dataTable = $dataTable;
         $this->params = $params;
@@ -118,6 +118,9 @@ class DataTableView
      */
     public function generateColumnUrl(DataTableColumn $column)
     {
+        if (is_null($this->request)) {
+            return '#';
+        }
         // build params
         $routeName = $this->request->get('_route');
         $route = $this->router->getRouteCollection()->get($routeName);
@@ -173,6 +176,9 @@ class DataTableView
      */
     public function createPagerView()
     {
+        if (is_null($this->request)) {
+            return '';
+        }
         $view = new TwitterBootstrap3View();
 
         $options = array(
