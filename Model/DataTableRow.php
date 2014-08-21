@@ -36,8 +36,23 @@ class DataTableRow
         $this->pA = PropertyAccess::createPropertyAccessor();
     }
 
-    public function getColumnValue(DataTableColumn $column)
+    protected function resolveColumn($columnName)
     {
+        foreach ($this->dataTable->getColumns() as $column) {
+            if ($column->getName() === $columnName || $column->getPropertyPath() === $columnName) {
+                return $column;
+            }
+        }
+
+        throw new \RuntimeException("Failed to resolve column '$columnName'");
+    }
+
+    public function getColumnValue($column)
+    {
+        if (!$column instanceof DataTableColumn) {
+            $column = $this->resolveColumn($column);
+        }
+
         // symfony >= 2.5 with isReadable
         if (method_exists($this->pA, 'isReadable')) {
             if (!$this->pA->isReadable($this->data, $column->getPropertyPath())) {
@@ -54,8 +69,12 @@ class DataTableRow
         return $value;
     }
 
-    public function getColumnType(DataTableColumn $column)
+    public function getColumnType($column)
     {
+        if (!$column instanceof DataTableColumn) {
+            $column = $this->resolveColumn($column);
+        }
+
         $value = $this->getColumnValue($column);
         if (!is_object($value)) {
             return gettype($value);

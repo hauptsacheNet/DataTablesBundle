@@ -27,9 +27,6 @@ class DataTableView
      */
     private $params;
 
-    /** @var DataTableRow[] */
-    private $rows = array();
-
     /**
      * @var Pagerfanta
      */
@@ -94,11 +91,25 @@ class DataTableView
      */
     public function getRows()
     {
-        $this->rows = array();
+        $rows = array();
         foreach ($this->pager as $row) {
-            $this->rows[] = new DataTableRow($row, $this->getDataTable());
+            $rows[] = new DataTableRow($row, $this->getDataTable());
         }
-        return $this->rows;
+
+        return $rows;
+    }
+
+    /**
+     * @return DataTableRow[]
+     */
+    public function getAllRows()
+    {
+        $rows = array();
+        foreach ($this->pager->getAdapter()->getSlice(0, 32000) as $row) {
+            $rows[] = new DataTableRow($row, $this->getDataTable());
+        }
+
+        return $rows;
     }
 
     /**
@@ -134,17 +145,15 @@ class DataTableView
             if ($value !== null) {
 
                 if (is_object($value)) {
-            		// FIXME there must be a better way
+                    // FIXME there must be a better way than using doctrine directly
                     $meta = $this->em->getClassMetadata(get_class($value));
                     if ($meta === null) {
                         throw new \LogicException("Only Entities are implemented for automatic url generation");
                     }
 
                     $identifier = $meta->getIdentifierValues($value);
-                    if (count($identifier) > 1) {
-                        throw new \LogicException("Don't know how to handle multiple identifiers for url generation");
-                    } else if (empty($identifier)) {
-                        throw new \LogicException("There are no identifiers for " . get_class($value));
+                    if (count($identifier) !== 1) {
+                        throw new \LogicException("Don't know how to handle " . count($identifier) . " identifiers for url generation");
                     } else {
                         $params[$pathVar] = reset($identifier);
                     }
@@ -182,15 +191,17 @@ class DataTableView
         $view = new TwitterBootstrap3View();
 
         $options = array(
-            'prev_message'        => '&larr;',
-            'next_message'        => '&rarr;',
+            'prev_message' => '&larr;',
+            'next_message' => '&rarr;',
         );
 
         $request = $this->request;
         $router = $this->router;
         $dataTableDefinition = $this->dataTable;
         $pager = $this->pager;
+
         return $view->render($this->pager, function ($page) use ($request, $router, $dataTableDefinition, $pager) {
+
             // build params
             $routeName = $request->get('_route');
             $route = $router->getRouteCollection()->get($routeName);
@@ -223,14 +234,16 @@ class DataTableView
     public function toCsv()
     {
         $fh = fopen('php://temp', 'w+');
-        for ($page = 1; $page <= $this->getPager()->getNbPages(); $page++) {
-            $this->getPager()->setCurrentPage($page);
-            foreach ($this->getRows() as $row) {
-                $data = $row->toArray();
-                fputcsv($fh, $data);
-            }
+
+        foreach ($this->getAllRows() as $row) {
+            $row = new DataTableRow($row, $this);
+            fputcsv($fh, $row->toArray());
         }
+
         rewind($fh);
-        return mb_convert_encoding(stream_get_contents($fh), "Windows-1252", 'UTF-8');
+        $csv = stream_get_contents($fh);
+        fclose($fh);
+
+        return mb_convert_encoding($csv, "Windows-1252", 'UTF-8');
     }
 }
