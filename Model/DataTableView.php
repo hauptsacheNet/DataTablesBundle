@@ -231,13 +231,16 @@ class DataTableView
      *
      * @return string
      */
-    public function toCsv()
+    public function toCsv($delimiter = ',', $enclosure = '"')
     {
         $fh = fopen('php://temp', 'w+');
 
-        foreach ($this->getAllRows() as $row) {
-            $row = new DataTableRow($row, $this);
-            fputcsv($fh, $row->toArray());
+        for ($page = 1; $page <= $this->getPager()->getNbPages(); $page++) {
+            $this->getPager()->setCurrentPage($page);
+            foreach ($this->getAllRows() as $row) {
+                $data = $row->toArray();
+                fputcsv($fh, $data, $delimiter, $enclosure);
+            }
         }
 
         rewind($fh);
