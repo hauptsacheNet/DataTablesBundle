@@ -56,7 +56,7 @@ class DataTableColumn
     /**
      * @param array $sortings
      */
-    public function setSortings($sortings)
+    public function setSortings(array $sortings = null)
     {
         $this->sortings = $sortings;
     }
@@ -66,7 +66,7 @@ class DataTableColumn
      */
     public function getSortings()
     {
-        return $this->sortings;
+        return is_array($this->sortings) ? $this->sortings : array();
     }
 
     /**
@@ -75,7 +75,7 @@ class DataTableColumn
      */
     public function getSorting($index)
     {
-        return array_key_exists($index, $this->sortings)
+        return array_key_exists($index, $this->getSortings())
             ? $this->sortings[$index] : array();
     }
 
