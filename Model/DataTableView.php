@@ -124,6 +124,48 @@ class DataTableView
     }
 
     /**
+     * @return array
+     * @throws \LogicException
+     */
+    protected function getUrlParams()
+    {
+        $routeName = $this->request->get('_route');
+        $route = $this->router->getRouteCollection()->get($routeName);
+
+        $pathVariables = $route->compile()->getVariables();
+        $params = $this->request->query->all();
+
+        // add route params to params array
+        foreach ($pathVariables as $pathVar) {
+
+            $value = $this->request->get($pathVar, false);
+            if ($value === false) {
+                continue;
+            }
+
+            if (!is_object($value)) {
+                $params[$pathVar] = $value;
+                continue;
+            }
+
+            // FIXME there must be a better way than using doctrine directly
+            $meta = $this->em->getClassMetadata(get_class($value));
+            if ($meta === null) {
+                throw new \LogicException("Only Entities are implemented for automatic url generation");
+            }
+
+            $identifier = $meta->getIdentifierValues($value);
+            if (count($identifier) !== 1) {
+                throw new \LogicException("Don't know how to handle " . count($identifier) . " identifiers for url generation");
+            } else {
+                $params[$pathVar] = reset($identifier);
+            }
+        }
+
+        return $params;
+    }
+
+    /**
      * @param DataTableColumn $column
      * @return string
      */
@@ -132,38 +174,10 @@ class DataTableView
         if (is_null($this->request)) {
             return '#';
         }
-        // build params
-        $routeName = $this->request->get('_route');
-        $route = $this->router->getRouteCollection()->get($routeName);
-        $pathVariables = $route->compile()->getVariables();
-
-        $params = $this->request->query->all();
-
-        // add route params to params array
-        foreach ($pathVariables as $pathVar) {
-            $value = $this->request->get($pathVar, null);
-            if ($value !== null) {
-
-                if (is_object($value)) {
-                    // FIXME there must be a better way than using doctrine directly
-                    $meta = $this->em->getClassMetadata(get_class($value));
-                    if ($meta === null) {
-                        throw new \LogicException("Only Entities are implemented for automatic url generation");
-                    }
-
-                    $identifier = $meta->getIdentifierValues($value);
-                    if (count($identifier) !== 1) {
-                        throw new \LogicException("Don't know how to handle " . count($identifier) . " identifiers for url generation");
-                    } else {
-                        $params[$pathVar] = reset($identifier);
-                    }
-                } else if (is_scalar($value)) {
-                    $params[$pathVar] = $value;
-                }
-            }
-        }
 
         $name = $this->dataTable->getName();
+        $params = $this->getUrlParams();
+
         if (!array_key_exists($name, $params) || !is_array($params[$name])) {
             $params[$name] = array();
         }
@@ -200,28 +214,16 @@ class DataTableView
         $dataTableDefinition = $this->dataTable;
         $pager = $this->pager;
 
-        return $view->render($this->pager, function ($page) use ($request, $router, $dataTableDefinition, $pager) {
+        $params = $this->getUrlParams();
 
-            // build params
-            $routeName = $request->get('_route');
-            $route = $router->getRouteCollection()->get($routeName);
-            $pathVariables = $route->compile()->getVariables();
-
-            $params = $request->query->all();
-
-            // add route params to params array
-            foreach ($pathVariables as $pathVar) {
-                if ($request->get($pathVar, false)) {
-                    $params[$pathVar] = $request->get($pathVar);
-                }
-            }
+        return $view->render($this->pager, function ($page) use ($request, $router, $dataTableDefinition, $pager, $params) {
 
             $name = $dataTableDefinition->getName();
             if (!array_key_exists($name, $params) || !is_array($params[$name])) {
                 $params[$name] = array();
             }
-            $params[$name]['offset'] = ($page - 1) * $pager->getMaxPerPage();
 
+            $params[$name]['offset'] = ($page - 1) * $pager->getMaxPerPage();
             return $router->generate($request->get('_route'), $params);
         }, $options);
     }
