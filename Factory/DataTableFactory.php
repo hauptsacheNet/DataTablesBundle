@@ -35,13 +35,17 @@ class DataTableFactory
         $this->em = $em;
     }
 
-    public function createView(DataTable $dataTableDefinition, QueryBuilder $queryBuilder, $params = array())
+    public function createView(DataTable $dataTableDefinition, QueryBuilder $queryBuilder = null, $params = array())
     {
         $params = array_merge($dataTableDefinition->getDefaultParameters(), $params);
         $request = $this->requestStack->getMasterRequest();
 
         if ($request) {
             $params = array_merge($params, $request->get($dataTableDefinition->getName(), array()));
+        }
+
+        if ($queryBuilder === null) {
+            $queryBuilder = $dataTableDefinition->createQueryBuilder($this->em);
         }
 
         $dataTableDefinition->applySortingToQueryBuilder($queryBuilder, $params['sorting']);

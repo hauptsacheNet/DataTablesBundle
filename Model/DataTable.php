@@ -8,6 +8,7 @@
 
 namespace Hn\DataTablesBundle\Model;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 
 abstract class DataTable
@@ -88,6 +89,18 @@ abstract class DataTable
     {
         return array_key_exists($name, $this->columns)
             ? $this->columns[$name] : null;
+    }
+    /**
+     * Can automatically create a query builder from an entity manager.
+     * This can be used to join stuff beforehand.
+     *
+     * @param EntityManager $entityManager
+     * @throws \LogicException if not implemented
+     * @returns QueryBuilder
+     */
+    public function createQueryBuilder(EntityManager $entityManager)
+    {
+        throw new \LogicException("create query builder not implemented");
     }
 
     public function applySortingToQueryBuilder(QueryBuilder $queryBuilder, $sorting)
