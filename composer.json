@@ -16,7 +16,8 @@
     "require": {
     	"php": ">=5.3.3",
     	"symfony/symfony": "~2.4",
-    	"doctrine/orm": "~2.2,>=2.2.3"
+    	"doctrine/orm": "~2.2,>=2.2.3",
+        "pagerfanta/pagerfanta": "1.0.*@dev"
 	},
     "require-dev": {
         "sensio/generator-bundle": "~2.3"
