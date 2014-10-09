@@ -10,6 +10,7 @@ namespace Hn\DataTablesBundle\Model;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
+use Symfony\Component\Form\FormTypeInterface;
 
 abstract class DataTable
 {
@@ -125,5 +126,15 @@ abstract class DataTable
      * @return string
      */
     public abstract function getName();
+
+    /**
+     * Returns a possible form type to show as filter.
+     *
+     * @return string|FormTypeInterface
+     */
+    public function getFilterFormType()
+    {
+        return $this->getName() . '_filter';
+    }
 
 }

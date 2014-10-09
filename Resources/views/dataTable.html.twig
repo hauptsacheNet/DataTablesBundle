@@ -4,13 +4,17 @@
 {% set columns = dataTableView.columns %}
 {% set rows = dataTableView.rows %}
 <div class="data-table data-table-{{ dataTable.name }} table-responsive">
-    {% set offsetStart = dataTableView.pager.getCurrentPageOffsetStart() %}
-    {% set offsetEnd = dataTableView.pager.getCurrentPageOffsetEnd() %}
-    {% set numberResults = dataTableView.pager.getNbResults() %}
+    {% set offsetStart = dataTableView.pager.currentPageOffsetStart %}
+    {% set offsetEnd = dataTableView.pager.currentPageOffsetEnd %}
+    {% set numberResults = dataTableView.pager.nbResults %}
 
     <div class="row data-table-overhead">
         <div class="col-sm-4 data-table-search">
-            {% block table_search %}{% endblock %}
+            {% block table_search %}
+                {% if dataTableView.form is not null %}
+                    {{ form(dataTableView.form) }}
+                {% endif %}
+            {% endblock %}
         </div>
         <div class="col-sm-4 data-table-results">
             {% block table_results %}
@@ -23,7 +27,7 @@
         </div>
     </div>
 
-    {{ block('before_table') }}
+    {% block before_table %}{% endblock before_table %}
 
     <table class="{{ tableClass|default('table table-striped table-hover') }}" {{ block('table_attr') }}>
         {% block thead %}

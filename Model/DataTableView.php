@@ -12,6 +12,7 @@ use Doctrine\Common\Util\Debug;
 use Doctrine\ORM\EntityManager;
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\View\TwitterBootstrap3View;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -38,9 +39,14 @@ class DataTableView
     private $router;
 
     /**
-     * @var Request
+     * @var string
      */
-    private $request;
+    private $route;
+
+    /**
+     * @var array
+     */
+    private $requestParams;
 
     /**
      * @var EntityManager
@@ -48,21 +54,29 @@ class DataTableView
     private $em;
 
     /**
+     * @var FormView
+     */
+    private $form;
+
+    /**
      * @param DataTable $dataTable
      * @param array $params
      * @param Pagerfanta $pager
      * @param RouterInterface $router
-     * @param Request $request
+     * @param $route
+     * @param $requestParams
      * @param EntityManager $em
      */
-    public function __construct(DataTable $dataTable, array $params, Pagerfanta $pager, RouterInterface $router, Request $request = null, EntityManager $em)
+    public function __construct(DataTable $dataTable, array $params, Pagerfanta $pager, RouterInterface $router, $route, $requestParams, EntityManager $em, FormView $form = null)
     {
         $this->dataTable = $dataTable;
         $this->params = $params;
         $this->pager = $pager;
         $this->router = $router;
-        $this->request = $request;
+        $this->route = $route;
+        $this->requestParams = $requestParams;
         $this->em = $em;
+        $this->form = $form;
     }
 
     /**
@@ -81,6 +95,9 @@ class DataTableView
         return $this->pager;
     }
 
+    /**
+     * @return DataTableColumn[]
+     */
     public function getColumns()
     {
         return $this->dataTable->getColumns();
@@ -124,45 +141,37 @@ class DataTableView
     }
 
     /**
+     * @return FormView
+     */
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    /**
      * @return array
      * @throws \LogicException
+     * @deprecated use #getRequestParams instead
      */
     protected function getUrlParams()
     {
-        $routeName = $this->request->get('_route');
-        $route = $this->router->getRouteCollection()->get($routeName);
+        return $this->requestParams;
+    }
 
-        $pathVariables = $route->compile()->getVariables();
-        $params = $this->request->query->all();
+    /**
+     * @return string
+     */
+    protected function getCurrentRoute()
+    {
+        return $this->route;
+    }
 
-        // add route params to params array
-        foreach ($pathVariables as $pathVar) {
-
-            $value = $this->request->get($pathVar, false);
-            if ($value === false) {
-                continue;
-            }
-
-            if (!is_object($value)) {
-                $params[$pathVar] = $value;
-                continue;
-            }
-
-            // FIXME there must be a better way than using doctrine directly
-            $meta = $this->em->getClassMetadata(get_class($value));
-            if ($meta === null) {
-                throw new \LogicException("Only Entities are implemented for automatic url generation");
-            }
-
-            $identifier = $meta->getIdentifierValues($value);
-            if (count($identifier) !== 1) {
-                throw new \LogicException("Don't know how to handle " . count($identifier) . " identifiers for url generation");
-            } else {
-                $params[$pathVar] = reset($identifier);
-            }
-        }
-
-        return $params;
+    /**
+     * @return array
+     */
+    protected function getRequestParams()
+    {
+        return $this->requestParams;
     }
 
     /**
@@ -171,12 +180,8 @@ class DataTableView
      */
     public function generateColumnUrl(DataTableColumn $column)
     {
-        if (is_null($this->request)) {
-            return '#';
-        }
-
         $name = $this->dataTable->getName();
-        $params = $this->getUrlParams();
+        $params = $this->getRequestParams();
 
         if (!array_key_exists($name, $params) || !is_array($params[$name])) {
             $params[$name] = array();
@@ -189,7 +194,7 @@ class DataTableView
         $params[$name]['sorting'] = array(
             $column->getPropertyPath() => $nextSortingIndex
         );
-        return $this->router->generate($this->request->get('_route'), $params);
+        return $this->router->generate($this->getCurrentRoute(), $params);
     }
 
     /**
@@ -199,9 +204,6 @@ class DataTableView
      */
     public function createPagerView()
     {
-        if (is_null($this->request)) {
-            return '';
-        }
         $view = new TwitterBootstrap3View();
 
         $options = array(
@@ -209,14 +211,13 @@ class DataTableView
             'next_message' => '&rarr;',
         );
 
-        $request = $this->request;
+        $route = $this->getCurrentRoute();
+        $params = $this->getRequestParams();
         $router = $this->router;
         $dataTableDefinition = $this->dataTable;
         $pager = $this->pager;
 
-        $params = $this->getUrlParams();
-
-        return $view->render($this->pager, function ($page) use ($request, $router, $dataTableDefinition, $pager, $params) {
+        return $view->render($this->pager, function ($page) use ($route, $params, $router, $dataTableDefinition, $pager) {
 
             $name = $dataTableDefinition->getName();
             if (!array_key_exists($name, $params) || !is_array($params[$name])) {
@@ -224,13 +225,15 @@ class DataTableView
             }
 
             $params[$name]['offset'] = ($page - 1) * $pager->getMaxPerPage();
-            return $router->generate($request->get('_route'), $params);
+            return $router->generate($route, $params);
         }, $options);
     }
 
     /**
      * writes table data via fputcsv to tmp file and returns the result
      *
+     * @param string $delimiter
+     * @param string $enclosure
      * @return string
      */
     public function toCsv($delimiter = ',', $enclosure = '"')

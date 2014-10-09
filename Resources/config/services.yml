@@ -8,3 +8,6 @@ services:
           - @router
           - @request_stack
           - @doctrine.orm.entity_manager
+          - @form.factory
+          - @form.registry
+          - @?hn_filter
