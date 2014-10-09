@@ -22,6 +22,9 @@
     "require-dev": {
         "sensio/generator-bundle": "~2.3"
     },
+    "suggest": {
+        "hn/filter-bundle": "Allows more advanced filters in a data table."
+    },
     "autoload": {
         "psr-0": { "Hn\\DataTablesBundle": "" }
     },
