@@ -1,5 +1,6 @@
 parameters:
     hn_data_tables.factory.class: Hn\DataTablesBundle\Factory\DataTableFactory
+    hn_data_tables.array_factory.class: Hn\DataTablesBundle\Factory\ArrayDataTableFactory
 
 services:
     hn_data_tables.factory:
@@ -11,3 +12,10 @@ services:
           - @form.factory
           - @form.registry
           - @?hn_filter
+
+    hn_data_tables.array_factory:
+        class: %hn_data_tables.array_factory.class%
+        arguments:
+          - @router
+          - @request_stack
+          - @doctrine.orm.entity_manager
