@@ -254,4 +254,25 @@ class DataTableView
 
         return mb_convert_encoding($csv, "Windows-1252", 'UTF-8');
     }
+
+    public function getDataTableRequestParams()
+    {
+        $dataTableDefinition = $this->dataTable;
+        $result = array();
+        $params = $this->getRequestParams();
+        $name = $dataTableDefinition->getName();
+        if (array_key_exists($name, $params) && is_array($params[$name])) {
+            $result[$name] = $params[$name];
+        }
+
+        $form = $this->getForm();
+        if ($form !== null) {
+            $formName = $form->vars['name'];
+            if (array_key_exists($formName, $params) && is_array($params[$formName])) {
+                $result[$formName] = $params[$formName];
+            }
+        }
+
+        return $result;
+    }
 }
