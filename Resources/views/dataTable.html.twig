@@ -3,101 +3,108 @@
 {% set dataTable = dataTableView.dataTable %}
 {% set columns = dataTableView.columns %}
 {% set rows = dataTableView.rows %}
-<div class="data-table data-table-{{ dataTable.name }} table-responsive">
+<div class="data-table data-table-{{ dataTable.name }}">
     {% set offsetStart = dataTableView.pager.currentPageOffsetStart %}
     {% set offsetEnd = dataTableView.pager.currentPageOffsetEnd %}
     {% set numberResults = dataTableView.pager.nbResults %}
 
     <div class="row data-table-overhead">
         <div class="col-sm-4 data-table-search">
-            {% block table_search %}
-                {% if dataTableView.form is not null %}
-                    {{ form(dataTableView.form) }}
-                {% endif %}
-            {% endblock %}
+            <div class="form-group">
+                {% block table_search %}
+                    {% if dataTableView.form is not null %}
+                        {{ form(dataTableView.form) }}
+                    {% endif %}
+                {% endblock %}
+            </div>
         </div>
         <div class="col-sm-4 data-table-results">
-            {% block table_results %}
-                {% block entry_name %}Ergebnisse{% endblock %}
-                {{ offsetStart }} - {{ offsetEnd }} von {{ numberResults }}
-            {% endblock %}
+            <div class="form-group">
+                {% block table_results %}
+                    {% block entry_name %}Ergebnisse{% endblock %}
+                    {{ offsetStart }} - {{ offsetEnd }} von {{ numberResults }}
+                {% endblock %}
+            </div>
         </div>
         <div class="col-sm-4 data-table-actions text-right">
-            {% block table_actions %}{% endblock %}
+            <div class="form-group">
+                {% block table_actions %}{% endblock %}
+            </div>
         </div>
     </div>
 
     {% block before_table %}{% endblock before_table %}
 
-    <table class="{{ tableClass|default('table table-striped table-hover') }}" {{ block('table_attr') }}>
-        {% block thead %}
-            <thead>
-            {% block thead_tr %}
-                <tr {{ block('table_thead_tr_attr') }}>
-                    {%- spaceless %}
-                        {% block thead_tr_inner %}
-                            {% for column in columns %}
-                                {% set sortingIndex = dataTableView.getColumnSortingIndex(column) %}
-                                {% set hasSortings = column.hasSortings %}
-                                {% set columnName = column.name %}
+    <div class="table-responsive">
+        <table class="{{ tableClass|default('table table-striped table-hover') }}" {{ block('table_attr') }}>
+            {% block thead %}
+                <thead>
+                    {% block thead_tr %}
+                        <tr {{ block('table_thead_tr_attr') }}>
+                            {%- spaceless %}
+                                {% block thead_tr_inner %}
+                                    {% for column in columns %}
+                                        {% set sortingIndex = dataTableView.getColumnSortingIndex(column) %}
+                                        {% set hasSortings = column.hasSortings %}
+                                        {% set columnName = column.name %}
 
-                                <th class="column-{{ columnName }}{% if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
-                                    {% set th_content = block('thead_column_' ~ columnName)|default( columnName|humanize|trans ) %}
-                                    {% if hasSortings %}
-                                        <a href="{{ dataTableView.generateColumnUrl(column) }}">
-                                            {{ th_content }}
-                                        </a>
-                                    {% else %}
-                                        {{ th_content }}
-                                    {% endif %}
-                                </th>
-                            {% endfor %}
-                        {% endblock thead_tr_inner %}
-                    {% endspaceless -%}
-                </tr>
-            {% endblock thead_tr %}
-            </thead>
-        {% endblock thead %}
+                                        <th class="column-{{ columnName }}{% if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
+                                            {% set th_content = block('thead_column_' ~ columnName)|default( columnName|humanize|trans ) %}
+                                            {% if hasSortings %}
+                                                <a href="{{ dataTableView.generateColumnUrl(column) }}">
+                                                    {{ th_content }}
+                                                </a>
+                                            {% else %}
+                                                {{ th_content }}
+                                            {% endif %}
+                                        </th>
+                                    {% endfor %}
+                                {% endblock thead_tr_inner %}
+                            {% endspaceless -%}
+                        </tr>
+                    {% endblock thead_tr %}
+                </thead>
+            {% endblock thead %}
 
-        {% block tbody %}
-            <tbody>
-            {% for row in rows %}
-                {% set data = row.data %}
-                {% block tbody_tr %}
-                    <tr {{ block('table_tr_attr') }}>
-                        {%- spaceless %}
-                            {% block tbody_tr_inner %}
-                                {% for column in columns %}
-                                    {% set sortingIndex = dataTableView.getColumnSortingIndex(column) %}
-                                    {% set hasSortings = column.hasSortings %}
-                                    {% set columnName = column.name %}
-                                    {% set value = row.getColumnValue(column) %}
-                                    {% set type = row.getColumnType(column) %}
+            {% block tbody %}
+                <tbody>
+                    {% for row in rows %}
+                        {% set data = row.data %}
+                        {% block tbody_tr %}
+                            <tr {{ block('table_tr_attr') }}>
+                                {%- spaceless %}
+                                    {% block tbody_tr_inner %}
+                                        {% for column in columns %}
+                                            {% set sortingIndex = dataTableView.getColumnSortingIndex(column) %}
+                                            {% set hasSortings = column.hasSortings %}
+                                            {% set columnName = column.name %}
+                                            {% set value = row.getColumnValue(column) %}
+                                            {% set type = row.getColumnType(column) %}
 
-                                    <td class="column-{{ columnName }} column-type-{{ type }}
+                                            <td class="column-{{ columnName }} column-type-{{ type }}
                                         {%- if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
-                                        {% set defaultRender %}
-                                            {% block default_render %}
-                                                {% if value|length < 50 %}
-                                                    {{ value|striptags }}
-                                                {% else %}
-                                                    <div class="content-wrap">{{ value|striptags[0:200] }}</div>
-                                                {% endif %}
-                                            {% endblock %}
-                                        {% endset %}
-                                        {{ block('tbody_column_' ~ column.name)|default( defaultRender )|raw }}
-                                    </td>
-                                {% endfor %}
-                            {% endblock tbody_tr_inner %}
-                        {% endspaceless -%}
-                    </tr>
-                {% endblock tbody_tr %}
+                                                {% set defaultRender %}
+                                                {% block default_render %}
+                                                    {% if value|length < 50 %}
+                                                        {{ value|striptags }}
+                                                    {% else %}
+                                                        <div class="content-wrap">{{ value|striptags[0:200] }}</div>
+                                                    {% endif %}
+                                                {% endblock %}
+                                                {% endset %}
+                                                {{ block('tbody_column_' ~ column.name)|default( defaultRender )|raw }}
+                                            </td>
+                                        {% endfor %}
+                                    {% endblock tbody_tr_inner %}
+                                {% endspaceless -%}
+                            </tr>
+                        {% endblock tbody_tr %}
 
-            {% endfor %}
-            </tbody>
-        {% endblock tbody %}
-    </table>
-
+                    {% endfor %}
+                </tbody>
+            {% endblock tbody %}
+        </table>
+    </div>
     {% set pager = dataTableView.createPagerView() %}
     {% if pager is not empty %}
         <div class="data-table-pager">
