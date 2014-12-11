@@ -1,8 +1,11 @@
+{% stopwatch 'data table' %}
+
 {# dataTableView - is required #}
 {# tableClass - allows setting a custom class for the table #}
 {% set dataTable = dataTableView.dataTable %}
 {% set columns = dataTableView.columns %}
 {% set rows = dataTableView.rows %}
+
 <div class="data-table data-table-{{ dataTable.name }}">
     {% set offsetStart = dataTableView.pager.currentPageOffsetStart %}
     {% set offsetEnd = dataTableView.pager.currentPageOffsetEnd %}
@@ -114,3 +117,4 @@
         </div>
     {% endif %}
 </div>
+{% endstopwatch %}
