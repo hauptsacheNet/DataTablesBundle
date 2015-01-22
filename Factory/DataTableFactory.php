@@ -141,7 +141,13 @@ class DataTableFactory
         $dataTable->applySortingToQueryBuilder($queryBuilder, $params['sorting']);
 
         // prepare routes
-        $route = isset($params['route']) ? $params['route'] : $request->get('_route');
+        $route = null;
+        if (isset($params['route']) ) {
+            $route = $params['route'];
+        }
+        if ($request != null) {
+            $route = $request->get('_route');
+        }
         $requestParams = isset($params['pass_params']) ? $params['pass_params'] : $this->getCurrentRequestParams();
 
         // prepare filter
