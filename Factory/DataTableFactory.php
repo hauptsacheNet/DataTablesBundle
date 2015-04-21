@@ -138,7 +138,7 @@ class DataTableFactory
         if ($queryBuilder === null) {
             $queryBuilder = $dataTable->createQueryBuilder($this->em);
         }
-        $dataTable->applySortingToQueryBuilder($queryBuilder, $params['sorting']);
+        $queryBuilder = $dataTable->applySortingToQueryBuilder($queryBuilder, $params['sorting']);
 
         // prepare routes
         $route = null;
@@ -163,7 +163,7 @@ class DataTableFactory
         }
 
         // configure pager
-        $pager = new Pagerfanta(new DoctrineORMAdapter($queryBuilder));
+        $pager = $dataTable->createPager($queryBuilder);
         $pager->setMaxPerPage($params['limit']);
         $pager->setCurrentPage(max(1, min($pager->getNbPages(), 1 + floor($params['offset'] / $params['limit']))));
         // create view

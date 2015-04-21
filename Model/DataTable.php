@@ -10,6 +10,8 @@ namespace Hn\DataTablesBundle\Model;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
+use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Pagerfanta;
 use Symfony\Component\Form\FormTypeInterface;
 
 abstract class DataTable
@@ -27,6 +29,8 @@ abstract class DataTable
         'limit' => 25,
         'sorting' => array()
     );
+
+
 
     public function __construct()
     {
@@ -106,6 +110,7 @@ abstract class DataTable
 
     public function applySortingToQueryBuilder(QueryBuilder $queryBuilder, $sorting)
     {
+
         // apply sorting
         foreach ($sorting as $sortColumn => $sortIndex) {
             $column = $this->getColumn($sortColumn);
@@ -135,6 +140,17 @@ abstract class DataTable
     public function getFilterFormType()
     {
         return $this->getName() . '_filter';
+    }
+
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     *
+     * @return Pagerfanta
+     */
+    public function createPager(QueryBuilder $queryBuilder)
+    {
+        return new Pagerfanta(new DoctrineORMAdapter($queryBuilder));
     }
 
 }
