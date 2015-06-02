@@ -194,6 +194,7 @@ class DataTableView
         $params[$name]['sorting'] = array(
             $column->getPropertyPath() => $nextSortingIndex
         );
+
         return $this->router->generate($this->getCurrentRoute(), $params);
     }
 

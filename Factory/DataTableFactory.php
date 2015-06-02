@@ -60,9 +60,9 @@ class DataTableFactory
     /**
      * @return array
      */
-    protected function getCurrentRequestParams()
+    protected function getMasterRequestParams()
     {
-        $request = $this->requestStack->getCurrentRequest();
+        $request = $this->requestStack->getMasterRequest();
         if ($request === null) {
             return array();
         }
@@ -142,7 +142,7 @@ class DataTableFactory
 
         // prepare routes
         $route = isset($params['route']) ? $params['route'] : $request->get('_route');
-        $requestParams = isset($params['pass_params']) ? $params['pass_params'] : $this->getCurrentRequestParams();
+        $requestParams = isset($params['pass_params']) ? $params['pass_params'] : $this->getMasterRequestParams();
 
         // prepare filter
         $form = $this->createFilterForm($dataTable, $route, $requestParams);
