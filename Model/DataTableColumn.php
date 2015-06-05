@@ -29,6 +29,11 @@ class DataTableColumn
      */
     private $dataTransformers = array();
 
+    /**
+     * @var string|\Closure
+     */
+    private $template;
+
     public function __construct($propertyPath)
     {
         $this->propertyPath = $propertyPath;
@@ -111,4 +116,56 @@ class DataTableColumn
         return new DataTransformerChain($this->dataTransformers);
     }
 
+    /**
+     * @param string|\Closure $template
+     */
+    public function setTemplate($template)
+    {
+        if (!is_string($template) && !is_callable($template)) {
+            $type = is_object($template) ? get_class($template) : gettype($template);
+            throw new \RuntimeException("Template must be a string or a callable, got $type");
+        }
+
+        $this->template = $template;
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    public function getTemplate($value)
+    {
+        if ($this->template === null) {
+            switch (gettype($value)) {
+                case 'string':
+                    return 'HnDataTablesBundle:column:string.html.twig';
+
+                case 'integer':
+                case 'double':
+                case 'float':
+                    return 'HnDataTablesBundle:column:number.html.twig';
+
+                case 'boolean':
+                    return 'HnDataTablesBundle:column:boolean.html.twig';
+
+                default:
+                    $type = is_object($value) ? get_class($value) : gettype($value);
+                    throw new \RuntimeException("There is no default template for $type");
+            }
+        }
+
+        if (is_callable($this->template)) {
+            $template = $this->template;
+            $template = $template($value);
+
+            if (!is_string($template)) {
+                $type = is_object($template) ? get_class($template) : gettype($template);
+                throw new \RuntimeException("Template callback must return a string, got $type");
+            }
+
+            return $template;
+        }
+
+        return $this->template;
+    }
 }

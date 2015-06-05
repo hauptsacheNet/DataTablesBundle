@@ -75,6 +75,10 @@ abstract class DataTable
             }
         }
 
+        if (array_key_exists('template', $options)) {
+            $column->setTemplate($options['template']);
+        }
+
         $this->columns[$name] = $column;
     }
 

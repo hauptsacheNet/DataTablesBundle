@@ -1,0 +1,7 @@
+<div class="content-wrap">
+    {% if value|length < 50 %}
+        {{ value|striptags }}
+    {% else %}
+        {{ value|striptags[0:200] }}
+    {% endif %}
+</div>
