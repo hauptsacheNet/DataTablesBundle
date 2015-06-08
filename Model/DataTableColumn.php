@@ -136,7 +136,8 @@ class DataTableColumn
     public function getTemplate($value)
     {
         if ($this->template === null) {
-            switch (gettype($value)) {
+            $type = is_object($value) ? get_class($value) : gettype($value);
+            switch ($type) {
                 case 'string':
                     return 'HnDataTablesBundle:column:string.html.twig';
 
@@ -148,8 +149,10 @@ class DataTableColumn
                 case 'boolean':
                     return 'HnDataTablesBundle:column:boolean.html.twig';
 
+                case 'DateTime':
+                    return 'HnDataTablesBundle:column:dateTime.html.twig';
+
                 default:
-                    $type = is_object($value) ? get_class($value) : gettype($value);
                     throw new \RuntimeException("There is no default template for $type");
             }
         }
