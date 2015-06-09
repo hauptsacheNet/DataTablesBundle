@@ -149,6 +149,9 @@ class DataTableColumn
                 case 'boolean':
                     return 'HnDataTablesBundle:column:boolean.html.twig';
 
+                case 'NULL':
+                    return 'HnDataTablesBundle:column:null.html.twig';
+
                 case 'DateTime':
                     return 'HnDataTablesBundle:column:dateTime.html.twig';
 
