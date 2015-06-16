@@ -83,6 +83,10 @@ abstract class DataTable
             $column->setVirtual($options['virtual']);
         }
 
+        if (array_key_exists('label', $options)) {
+            $column->setLabel($options['label']);
+        }
+
         $this->columns[$name] = $column;
     }
 

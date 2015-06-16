@@ -39,6 +39,11 @@ class DataTableColumn
      */
     private $virtual;
 
+    /**
+     * @var string|null
+     */
+    private $label;
+
     public function __construct($propertyPath)
     {
         $this->propertyPath = $propertyPath;
@@ -194,5 +199,21 @@ class DataTableColumn
     public function setVirtual($virtual)
     {
         $this->virtual = (bool)$virtual;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param null|string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
     }
 }

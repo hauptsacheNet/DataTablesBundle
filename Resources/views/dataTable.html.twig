@@ -52,7 +52,7 @@
                                         {% set columnName = column.name %}
 
                                         <th class="column-{{ columnName }}{% if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
-                                            {% set th_content = block('thead_column_' ~ columnName)|default( columnName|humanize|trans ) %}
+                                            {% set th_content = column.label|default(block('thead_column_' ~ columnName)|default( columnName|humanize|trans )) %}
                                             {% if hasSortings %}
                                                 <a href="{{ dataTableView.generateColumnUrl(column) }}">
                                                     {{ th_content }}
