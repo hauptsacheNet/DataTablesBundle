@@ -166,7 +166,8 @@ class DataTableColumn
                     return 'HnDataTablesBundle:column:dateTime.html.twig';
 
                 default:
-                    throw new \RuntimeException("There is no default template for $type");
+                    // there is no known template so just try plain echo
+                    return 'HnDataTablesBundle:column:plain.html.twig';
             }
         }
 
