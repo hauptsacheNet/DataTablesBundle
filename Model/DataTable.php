@@ -79,6 +79,10 @@ abstract class DataTable
             $column->setTemplate($options['template']);
         }
 
+        if (array_key_exists('virtual', $options)) {
+            $column->setVirtual($options['virtual']);
+        }
+
         $this->columns[$name] = $column;
     }
 

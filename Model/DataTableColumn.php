@@ -34,6 +34,11 @@ class DataTableColumn
      */
     private $template;
 
+    /**
+     * @var bool
+     */
+    private $virtual;
+
     public function __construct($propertyPath)
     {
         $this->propertyPath = $propertyPath;
@@ -173,5 +178,21 @@ class DataTableColumn
         }
 
         return $this->template;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isVirtual()
+    {
+        return $this->virtual;
+    }
+
+    /**
+     * @param boolean $virtual
+     */
+    public function setVirtual($virtual)
+    {
+        $this->virtual = (bool)$virtual;
     }
 }
