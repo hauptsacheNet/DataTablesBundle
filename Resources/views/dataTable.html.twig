@@ -11,6 +11,8 @@
     {% set offsetEnd = dataTableView.pager.currentPageOffsetEnd %}
     {% set numberResults = dataTableView.pager.nbResults %}
 
+    {% block before_head %}{% endblock before_head %}
+
     <div class="row data-table-overhead">
         <div class="col-sm-4 data-table-search">
             <div class="form-group">
