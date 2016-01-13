@@ -1,0 +1,5 @@
+{% if value is empty %}
+    {{ 'not set'|trans }}
+{% else %}
+    {{ value|date('d.m.Y H:i') }}
+{% endif %}

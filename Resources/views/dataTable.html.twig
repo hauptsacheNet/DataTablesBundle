@@ -54,7 +54,7 @@
                                         {% set columnName = column.name %}
 
                                         <th class="column-{{ columnName }}{% if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
-                                            {% set th_content = block('thead_column_' ~ columnName)|default( columnName|humanize|trans ) %}
+                                            {% set th_content = column.label|default(block('thead_column_' ~ columnName)|default( columnName|humanize|trans )) %}
                                             {% if hasSortings %}
                                                 <a href="{{ dataTableView.generateColumnUrl(column) }}">
                                                     {{ th_content }}
@@ -85,16 +85,13 @@
                                             {% set columnName = column.name %}
                                             {% set value = row.getColumnValue(column) %}
                                             {% set type = row.getColumnType(column) %}
+                                            {% set template = column.getTemplate(value) %}
 
                                             <td class="column-{{ columnName }} column-type-{{ type }}
                                         {%- if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
                                                 {% set defaultRender %}
                                                 {% block default_render %}
-                                                    {% if value|length < 50 %}
-                                                        {{ value|striptags }}
-                                                    {% else %}
-                                                        <div class="content-wrap">{{ value|striptags[0:200] }}</div>
-                                                    {% endif %}
+                                                    {% include template %}
                                                 {% endblock %}
                                                 {% endset %}
                                                 {{ block('tbody_column_' ~ column.name)|default( defaultRender )|raw }}

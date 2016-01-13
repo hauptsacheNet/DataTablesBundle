@@ -53,6 +53,11 @@ class DataTableRow
             $column = $this->resolveColumn($column);
         }
 
+        // virtual values never exist
+        if ($column->isVirtual()) {
+            return null;
+        }
+
         // symfony >= 2.5 with isReadable
         if (method_exists($this->pA, 'isReadable')) {
             if (!$this->pA->isReadable($this->data, $column->getPropertyPath())) {

@@ -29,6 +29,21 @@ class DataTableColumn
      */
     private $dataTransformers = array();
 
+    /**
+     * @var string|\Closure
+     */
+    private $template;
+
+    /**
+     * @var bool
+     */
+    private $virtual;
+
+    /**
+     * @var string|null
+     */
+    private $label;
+
     public function __construct($propertyPath)
     {
         $this->propertyPath = $propertyPath;
@@ -111,4 +126,95 @@ class DataTableColumn
         return new DataTransformerChain($this->dataTransformers);
     }
 
+    /**
+     * @param string|\Closure $template
+     */
+    public function setTemplate($template)
+    {
+        if (!is_string($template) && !is_callable($template)) {
+            $type = is_object($template) ? get_class($template) : gettype($template);
+            throw new \RuntimeException("Template must be a string or a callable, got $type");
+        }
+
+        $this->template = $template;
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    public function getTemplate($value)
+    {
+        if ($this->template === null) {
+            $type = is_object($value) ? get_class($value) : gettype($value);
+            switch ($type) {
+                case 'string':
+                    return 'HnDataTablesBundle:column:string.html.twig';
+
+                case 'integer':
+                case 'double':
+                case 'float':
+                    return 'HnDataTablesBundle:column:number.html.twig';
+
+                case 'boolean':
+                    return 'HnDataTablesBundle:column:boolean.html.twig';
+
+                case 'NULL':
+                    return 'HnDataTablesBundle:column:null.html.twig';
+
+                case 'DateTime':
+                    return 'HnDataTablesBundle:column:dateTime.html.twig';
+
+                default:
+                    // there is no known template so just try plain echo
+                    return 'HnDataTablesBundle:column:plain.html.twig';
+            }
+        }
+
+        if (is_callable($this->template)) {
+            $template = $this->template;
+            $template = $template($value);
+
+            if (!is_string($template)) {
+                $type = is_object($template) ? get_class($template) : gettype($template);
+                throw new \RuntimeException("Template callback must return a string, got $type");
+            }
+
+            return $template;
+        }
+
+        return $this->template;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isVirtual()
+    {
+        return $this->virtual;
+    }
+
+    /**
+     * @param boolean $virtual
+     */
+    public function setVirtual($virtual)
+    {
+        $this->virtual = (bool)$virtual;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param null|string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
 }

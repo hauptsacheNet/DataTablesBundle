@@ -75,6 +75,18 @@ abstract class DataTable
             }
         }
 
+        if (array_key_exists('template', $options)) {
+            $column->setTemplate($options['template']);
+        }
+
+        if (array_key_exists('virtual', $options)) {
+            $column->setVirtual($options['virtual']);
+        }
+
+        if (array_key_exists('label', $options)) {
+            $column->setLabel($options['label']);
+        }
+
         $this->columns[$name] = $column;
     }
 
