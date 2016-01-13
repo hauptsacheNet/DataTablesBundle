@@ -188,8 +188,13 @@ class DataTableView
         }
 
         $currentSortingIndex = $this->getColumnSortingIndex($column);
-        $nextSortingIndex = $currentSortingIndex === null
-            ? 0 : ($currentSortingIndex + 1) % count($column->getSortings());
+        if ($currentSortingIndex === null || $currentSortingIndex === '') {
+            $nextSortingIndex = 0;
+        } elseif (($currentSortingIndex + 1) >= count($column->getSortings())) {
+            $nextSortingIndex = '';
+        } else {
+            $nextSortingIndex = $currentSortingIndex + 1;
+        }
 
         $params[$name]['sorting'] = array(
             $column->getPropertyPath() => $nextSortingIndex
