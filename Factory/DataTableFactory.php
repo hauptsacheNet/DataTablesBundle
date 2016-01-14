@@ -131,7 +131,7 @@ class DataTableFactory
         $request = $this->requestStack->getMasterRequest();
 
         if ($request !== null) {
-            $params = array_merge($params, $request->get($dataTable->getName(), array()));
+            $params = array_merge($params, (array)$request->get($dataTable->getName(), array()));
         }
 
         // prepare doctrine query
