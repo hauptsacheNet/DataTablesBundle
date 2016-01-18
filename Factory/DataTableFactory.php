@@ -13,8 +13,6 @@ use Doctrine\ORM\QueryBuilder;
 use Hn\DataTablesBundle\Model\DataTable;
 use Hn\DataTablesBundle\Model\DataTableView;
 use Hn\FilterBundle\Service\FilterServiceInterface;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
-use Pagerfanta\Pagerfanta;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormRegistryInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -107,8 +105,14 @@ class DataTableFactory
     {
         $formType = $dataTable->getFilterFormType();
 
-        if (is_string($formType) && !$this->formRegistry->hasType($formType)) {
+        if ($formType === null) {
             return null;
+        }
+
+        if (is_string($formType)) {
+            if (!$this->formRegistry->hasType($formType)) {
+                return null;
+            }
         }
 
         return $this->formFactory->create($dataTable->getFilterFormType(), null, array(
