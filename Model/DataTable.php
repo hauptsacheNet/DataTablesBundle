@@ -61,6 +61,18 @@ abstract class DataTable
 
     protected function addColumn($name, array $options = array())
     {
+        $column = $this->createColumn($name, $options);
+        $this->appendColumn($name, $column);
+    }
+
+    public function addColumnBefore($beforeName, $name, array $options = array())
+    {
+        $column = $this->createColumn($name, $options);
+        $this->insertColumnBefore($beforeName, $name, $column);
+    }
+
+    protected function createColumn($name, array $options = [])
+    {
         $column = new DataTableColumn($name);
 
         if (array_key_exists('sortings', $options)) {
@@ -87,7 +99,26 @@ abstract class DataTable
             $column->setLabel($options['label']);
         }
 
+        return $column;
+    }
+
+    protected function appendColumn($name, DataTableColumn $column)
+    {
         $this->columns[$name] = $column;
+    }
+
+    protected function insertColumnBefore($beforeName, $name, DataTableColumn $column)
+    {
+        $newColumns = array();
+        foreach ($this->columns as $oldName => $oldColumn) {
+            if ($oldName === $beforeName) {
+                $newColumns[$name] = $column;
+            }
+
+            $newColumns[$oldName] = $oldColumn;
+        }
+
+        $this->columns = $newColumns;
     }
 
     /**
