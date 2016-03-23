@@ -6,16 +6,16 @@ services:
     hn_data_tables.factory:
         class: %hn_data_tables.factory.class%
         arguments:
-          - @router
-          - @request_stack
-          - @doctrine.orm.entity_manager
-          - @form.factory
-          - @form.registry
-          - @?hn_filter
+          - "@router"
+          - "@request_stack"
+          - "@doctrine.orm.entity_manager"
+          - "@form.factory"
+          - "@form.registry"
+          - "@?hn_filter"
 
     hn_data_tables.array_factory:
         class: %hn_data_tables.array_factory.class%
         arguments:
-          - @router
-          - @request_stack
-          - @doctrine.orm.entity_manager
+          - "@router"
+          - "@request_stack"
+          - "@doctrine.orm.entity_manager"
