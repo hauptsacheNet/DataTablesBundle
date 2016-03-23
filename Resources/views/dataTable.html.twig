@@ -26,8 +26,7 @@
         <div class="col-sm-4 data-table-results">
             <div class="form-group">
                 {%- block table_results -%}
-                    {%- block entry_name %}Ergebnisse{% endblock -%}
-                    {{ offsetStart }} - {{ offsetEnd }} von {{ numberResults }}
+                    {% block entry_name %}Ergebnisse{% endblock %} {{ offsetStart }} - {{ offsetEnd }} von {{ numberResults }}
                 {%- endblock -%}
             </div>
         </div>
