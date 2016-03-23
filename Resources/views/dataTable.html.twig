@@ -51,9 +51,11 @@
                                     {%- set sortingIndex = dataTableView.getColumnSortingIndex(column) -%}
                                     {%- set hasSortings = column.hasSortings -%}
                                     {%- set columnName = column.name -%}
+                                    {%- set columnClass = column.className -%}
 
-                                    <th class="column-{{ columnName }}{% if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
-                                        {%- set th_content = column.label|default(block('thead_column_' ~ columnName)|default( columnName|humanize|trans )) -%}
+                                    <th class="column-{{ columnName }} {{ columnClass }}
+                                        {%- if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
+                                        {%- set th_content = column.label|default(block('thead_column_' ~ columnName)|default(columnName|humanize|trans)) -%}
                                         {%- if hasSortings -%}
                                             <a href="{{ dataTableView.generateColumnUrl(column) }}">
                                                 {{- th_content -}}
@@ -83,14 +85,24 @@
                                         {%- set value = row.getColumnValue(column) -%}
                                         {%- set type = row.getColumnType(column) -%}
                                         {%- set template = column.getTemplate(value) -%}
+                                        {%- set link = dataTableView.getLink(row, column) -%}
+                                        {%- set columnClass = column.className -%}
 
-                                        <td class="column-{{ columnName }} column-type-{{ type }}
+                                        <td class="column-{{ columnName }} column-type-{{ type }} {{ columnClass }}
                                             {%- if sortingIndex is not null %} sorting-{{ sortingIndex }}{% endif %}">
+
                                             {%- set defaultRender -%}
-                                            {%- block default_render -%}
-                                                {%- include template -%}
-                                            {%- endblock -%}
+                                                {%- block default_render -%}
+                                                    {%- if link is not null -%}
+                                                        <a href="{{ link }}">
+                                                            {%- include template -%}
+                                                        </a>
+                                                    {%- else -%}
+                                                        {%- include template -%}
+                                                    {%- endif -%}
+                                                {%- endblock -%}
                                             {%- endset -%}
+
                                             {{- block('tbody_column_' ~ column.name)|default( defaultRender )|raw -}}
                                         </td>
                                     {%- endfor -%}

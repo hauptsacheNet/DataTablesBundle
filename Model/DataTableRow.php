@@ -53,7 +53,16 @@ class DataTableRow
             $column = $this->resolveColumn($column);
         }
 
-        // virtual values never exist
+        $fixedValue = $column->getFixedValue();
+        if ($fixedValue) {
+            if (is_callable($fixedValue)) {
+                return $fixedValue($this->data);
+            } else {
+                return $fixedValue;
+            }
+        }
+
+        // virtual values must not be requested
         if ($column->isVirtual()) {
             return null;
         }

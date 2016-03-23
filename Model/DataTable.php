@@ -99,6 +99,18 @@ abstract class DataTable
             $column->setLabel($options['label']);
         }
 
+        if (array_key_exists('link', $options)) {
+            $column->setLink($options['link']);
+        }
+
+        if (array_key_exists('value', $options)) {
+            $column->setFixedValue($options['value']);
+        }
+
+        if (array_key_exists('class', $options)) {
+            $column->setClassName($options['class']);
+        }
+
         return $column;
     }
 

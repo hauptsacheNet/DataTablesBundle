@@ -44,6 +44,21 @@ class DataTableColumn
      */
     private $label;
 
+    /**
+     * @var string|\Closure
+     */
+    private $link;
+
+    /**
+     * @var string|\Closure
+     */
+    private $fixedValue;
+
+    /**
+     * @var string
+     */
+    private $className;
+
     public function __construct($propertyPath)
     {
         $this->propertyPath = $propertyPath;
@@ -191,7 +206,7 @@ class DataTableColumn
      */
     public function isVirtual()
     {
-        return $this->virtual;
+        return $this->fixedValue || $this->virtual;
     }
 
     /**
@@ -199,6 +214,10 @@ class DataTableColumn
      */
     public function setVirtual($virtual)
     {
+        if (!$virtual && $this->fixedValue) {
+            throw new \RuntimeException("Columns with a fixed value are always virtual.");
+        }
+
         $this->virtual = (bool)$virtual;
     }
 
@@ -216,5 +235,53 @@ class DataTableColumn
     public function setLabel($label)
     {
         $this->label = $label;
+    }
+
+    /**
+     * @return \Closure|string
+     */
+    public function getLink()
+    {
+        return $this->link;
+    }
+
+    /**
+     * @param \Closure|string $link
+     */
+    public function setLink($link)
+    {
+        $this->link = $link;
+    }
+
+    /**
+     * @return \Closure|string
+     */
+    public function getFixedValue()
+    {
+        return $this->fixedValue;
+    }
+
+    /**
+     * @param \Closure|string $fixedValue
+     */
+    public function setFixedValue($fixedValue)
+    {
+        $this->fixedValue = $fixedValue;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName()
+    {
+        return $this->className;
+    }
+
+    /**
+     * @param string $className
+     */
+    public function setClassName($className)
+    {
+        $this->className = $className;
     }
 }

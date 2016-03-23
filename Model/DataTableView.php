@@ -281,4 +281,21 @@ class DataTableView
 
         return $result;
     }
+
+    /**
+     * @param DataTableRow $dataTableRow
+     * @param DataTableColumn $column
+     * @return string
+     */
+    public function getLink(DataTableRow $dataTableRow, DataTableColumn $column)
+    {
+        $link = $column->getLink();
+
+        if (is_callable($link)) {
+            $rowData = $dataTableRow->getData();
+            $link = $link($this->router, $rowData);
+        }
+
+        return $link;
+    }
 }
