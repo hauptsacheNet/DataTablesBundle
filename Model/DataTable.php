@@ -185,7 +185,12 @@ abstract class DataTable
      *
      * @return string
      */
-    public abstract function getName();
+    public function getName()
+    {
+        $classShortName = substr(strrchr(get_class($this), '\\'), 1);
+        $underscoredClassName = preg_replace('/(?<=.)((?<=[^A-Z])[A-Z]|[A-Z](?=[^A-Z]))/', '_$0', $classShortName);
+        return strtolower($underscoredClassName);
+    }
 
     /**
      * Returns a possible form type to show as filter.
