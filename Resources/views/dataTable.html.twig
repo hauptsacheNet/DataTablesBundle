@@ -92,7 +92,7 @@
 
                                             {%- set defaultRender -%}
                                                 {%- block default_render -%}
-                                                    {%- if link is not null -%}
+                                                    {%- if link is not null and column.linkWrap -%}
                                                         <a href="{{ link }}">
                                                             {%- include template -%}
                                                         </a>

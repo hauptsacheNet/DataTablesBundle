@@ -50,6 +50,13 @@ class DataTableColumn
     private $link;
 
     /**
+     * If true, the template will automatically be wrapped with a link if present.
+     *
+     * @var bool
+     */
+    private $linkWrap = true;
+
+    /**
      * @var string|\Closure
      */
     private $fixedValue;
@@ -283,5 +290,21 @@ class DataTableColumn
     public function setClassName($className)
     {
         $this->className = $className;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isLinkWrap()
+    {
+        return $this->linkWrap;
+    }
+
+    /**
+     * @param boolean $linkWrap
+     */
+    public function setLinkWrap($linkWrap)
+    {
+        $this->linkWrap = $linkWrap;
     }
 }

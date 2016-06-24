@@ -103,6 +103,10 @@ abstract class DataTable
             $column->setLink($options['link']);
         }
 
+        if (array_key_exists('linkWrap', $options)) {
+            $column->setLinkWrap($options['linkWrap']);
+        }
+
         if (array_key_exists('value', $options)) {
             $column->setFixedValue($options['value']);
         }
