@@ -67,19 +67,28 @@ class DataTableRow
             return null;
         }
 
+        $value = null;
+
         // symfony >= 2.5 with isReadable
         if (method_exists($this->pA, 'isReadable')) {
-            if (!$this->pA->isReadable($this->data, $column->getPropertyPath())) {
-                return null;
+            if ($this->pA->isReadable($this->data, $column->getPropertyPath())) {
+                $value = $this->pA->getValue($this->data, $column->getPropertyPath());
+            }
+        } else {
+            try {
+                $value = $this->pA->getValue($this->data, $column->getPropertyPath());
+            } catch (NoSuchPropertyException $e) {
+                // compatibility with symfony < 2.5
             }
         }
-        try {
-            $value = $this->pA->getValue($this->data, $column->getPropertyPath());
-        } catch (NoSuchPropertyException $e) {
-            return null; // compatibility with symfony < 2.5
+
+        $callback = $column->getCallback();
+        if (is_callable($callback)) {
+            $value = $callback($this->data, $value);
         }
 
         $value = $column->getDataTransformer()->transform($value);
+
         return $value;
     }
 

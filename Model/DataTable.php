@@ -95,6 +95,10 @@ abstract class DataTable
             $column->setVirtual($options['virtual']);
         }
 
+        if (array_key_exists('callback', $options)) {
+            $column->setCallback($options['callback']);
+        }
+
         if (array_key_exists('label', $options)) {
             $column->setLabel($options['label']);
         }

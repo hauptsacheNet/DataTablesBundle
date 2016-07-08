@@ -66,6 +66,11 @@ class DataTableColumn
      */
     private $className;
 
+    /**
+     * @var \Closure|null
+     */
+    private $callback;
+
     public function __construct($propertyPath)
     {
         $this->propertyPath = $propertyPath;
@@ -307,4 +312,21 @@ class DataTableColumn
     {
         $this->linkWrap = $linkWrap;
     }
+
+    /**
+     * @return \Closure|null
+     */
+    public function getCallback()
+    {
+        return $this->callback;
+    }
+
+    /**
+     * @param \Closure|null $callback
+     */
+    public function setCallback(\Closure $callback = null)
+    {
+        $this->callback = $callback;
+    }
+
 }
